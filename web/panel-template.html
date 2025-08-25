@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - WhatsApp Bot INTED</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .user-item {
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+        .user-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+        }
+        .human-mode {
+            border-left-color: #28a745 !important;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-reset {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+            color: white;
+        }
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
+            color: white;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 2px solid #dee2e6;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-robot"></i> Panel de Control WhatsApp Bot INTED
+            </span>
+            <div class="d-flex">
+                <button class="btn btn-outline-light me-2" id="stats-btn">
+                    <i class="bi bi-graph-up"></i> Ver Estadísticas
+                </button>
+                <button class="btn btn-outline-light" id="logs-btn">
+                    <i class="bi bi-file-text"></i> Ver Logs
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill fs-1 mb-2"></i>
+                        <h3 class="mb-0">{{totalUsers}}</h3>
+                        <p class="mb-0">Usuarios Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-check-fill fs-1 mb-2"></i>
+                        <h3 class="mb-0">{{humanModeUsers}}</h3>
+                        <p class="mb-0">Modo Humano</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-chat-dots-fill fs-1 mb-2"></i>
+                        <h3 class="mb-0">{{activeUsers}}</h3>
+                        <p class="mb-0">Usuarios Activos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <button class="btn btn-reset btn-lg w-100" id="reset-all-btn">
+                            <i class="bi bi-arrow-clockwise"></i><br>
+                            Reset General
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de Usuarios -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-list-ul"></i> Usuarios Registrados</h5>
+                        <button class="btn btn-sm btn-outline-primary" id="refresh-btn">
+                            <i class="bi bi-arrow-clockwise"></i> Actualizar
+                        </button>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div id="usersList">
+                            {{usersList}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historial</h5>
+                        <button class="btn btn-sm btn-outline-secondary" id="history-btn">
+                            <i class="bi bi-arrow-clockwise"></i> Cargar
+                        </button>
+                    </div>
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        <div id="historyList">
+                            <p class="text-muted text-center">Haz clic en "Cargar" para ver el historial</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-lightbulb"></i> Estados de Usuario:</h6>
+                            <ul class="mb-0">
+                                <li><strong>Paso 0:</strong> Usuario nuevo</li>
+                                <li><strong>Paso 1:</strong> Seleccionando opción</li>
+                                <li><strong>Paso 2:</strong> Ingresando datos</li>
+                                <li><strong>Modo Humano:</strong> Esperando atención</li>
+                            </ul>
+                        </div>
+                        <div class="alert alert-warning">
+                            <h6><i class="bi bi-exclamation-triangle"></i> Acciones:</h6>
+                            <ul class="mb-0">
+                                <li><strong>Reset Individual:</strong> Reinicia un usuario específico</li>
+                                <li><strong>Reset General:</strong> Reinicia todos los usuarios</li>
+                                <li><strong>Actualizar:</strong> Refresca la lista</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        console.log('[DEBUG] Script del panel iniciado');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[DEBUG] DOM cargado, configurando event listeners');
+            
+            // Event listener para botones de reset individual
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('btn-reset-user')) {
+                    console.log('[DEBUG] Click en botón reset individual detectado');
+                    const chatId = e.target.getAttribute('data-chat-id');
+                    console.log('[DEBUG] ChatId extraído:', chatId);
+                    resetUser(chatId);
+                }
+            });
+            
+            // Event listener para reset general
+            const resetAllBtn = document.getElementById('reset-all-btn');
+            console.log('[DEBUG] Botón reset-all-btn encontrado:', !!resetAllBtn);
+            if (resetAllBtn) {
+                resetAllBtn.addEventListener('click', function() {
+                    console.log('[DEBUG] Click en reset-all-btn detectado');
+                    if (confirm('¿Estás seguro de que quieres resetear TODOS los usuarios? Esta acción no se puede deshacer.')) {
+                        console.log('[DEBUG] Usuario confirmó reset general');
+                        resetAllUsers();
+                    } else {
+                        console.log('[DEBUG] Usuario canceló reset general');
+                    }
+                });
+            }
+            
+            // Event listener para refresh
+            const refreshBtn = document.getElementById('refresh-btn');
+            console.log('[DEBUG] Botón refresh-btn encontrado:', !!refreshBtn);
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    console.log('[DEBUG] Click en refresh-btn detectado');
+                    location.reload();
+                });
+            }
+            
+            // Event listener para estadísticas
+            const statsBtn = document.getElementById('stats-btn');
+            console.log('[DEBUG] Botón stats-btn encontrado:', !!statsBtn);
+            if (statsBtn) {
+                statsBtn.addEventListener('click', function() {
+                    console.log('[DEBUG] Click en stats-btn detectado');
+                    getStats();
+                });
+            }
+            
+            // Event listener para logs
+            const logsBtn = document.getElementById('logs-btn');
+            console.log('[DEBUG] Botón logs-btn encontrado:', !!logsBtn);
+            if (logsBtn) {
+                logsBtn.addEventListener('click', function() {
+                    console.log('[DEBUG] Click en logs-btn detectado');
+                    viewLogs();
+                });
+            }
+            
+            // Event listener para historial
+            const historyBtn = document.getElementById('history-btn');
+            console.log('[DEBUG] Botón history-btn encontrado:', !!historyBtn);
+            if (historyBtn) {
+                historyBtn.addEventListener('click', function() {
+                    console.log('[DEBUG] Click en history-btn detectado');
+                    loadHistory();
+                });
+            }
+        });
+        
+        async function resetUser(chatId) {
+            console.log('[DEBUG] resetUser función iniciada para chatId:', chatId);
+            
+            if (!confirm(`¿Estás seguro de que quieres resetear el usuario ${chatId}?`)) {
+                console.log('[DEBUG] Usuario canceló reset individual');
+                return;
+            }
+            
+            console.log('[DEBUG] Usuario confirmó reset individual');
+            
+            try {
+                console.log('[DEBUG] Enviando petición POST a /api/reset-user');
+                console.log('[DEBUG] Datos a enviar:', { chatId });
+                
+                const response = await fetch('/api/reset-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ chatId })
+                });
+                
+                console.log('[DEBUG] Respuesta recibida, status:', response.status);
+                const result = await response.json();
+                console.log('[DEBUG] Resultado parseado:', result);
+                
+                if (response.ok) {
+                    alert('Usuario reseteado correctamente');
+                    console.log('[DEBUG] Reset exitoso, recargando página');
+                    location.reload();
+                } else {
+                    alert('Error al resetear usuario: ' + result.message);
+                    console.error('[DEBUG] Error en reset:', result);
+                }
+            } catch (error) {
+                console.error('[DEBUG] Error en resetUser:', error);
+                alert('Error de conexión al resetear usuario');
+            }
+        }
+        
+        async function resetAllUsers() {
+            console.log('[DEBUG] resetAllUsers función iniciada');
+            
+            try {
+                console.log('[DEBUG] Enviando petición POST a /api/reset-all');
+                
+                const response = await fetch('/api/reset-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('[DEBUG] Respuesta recibida, status:', response.status);
+                const result = await response.json();
+                console.log('[DEBUG] Resultado parseado:', result);
+                
+                if (response.ok) {
+                    alert(`Todos los usuarios han sido reseteados. Total: ${result.resetCount}`);
+                    console.log('[DEBUG] Reset general exitoso, recargando página');
+                    location.reload();
+                } else {
+                    alert('Error al resetear usuarios: ' + result.message);
+                    console.error('[DEBUG] Error en reset general:', result);
+                }
+            } catch (error) {
+                console.error('[DEBUG] Error en resetAllUsers:', error);
+                alert('Error de conexión al resetear usuarios');
+            }
+        }
+        
+        async function getStats() {
+            console.log('[DEBUG] getStats función iniciada');
+            
+            try {
+                console.log('[DEBUG] Enviando petición GET a /api/stats');
+                
+                const response = await fetch('/api/stats');
+                console.log('[DEBUG] Respuesta recibida, status:', response.status);
+                
+                const stats = await response.json();
+                console.log('[DEBUG] Estadísticas recibidas:', stats);
+                
+                alert(`Estadísticas del Bot:\n\nUsuarios Totales: ${stats.totalUsers}\nModo Humano: ${stats.humanModeUsers}\nUsuarios Activos: ${stats.activeUsers}\nRegistros en Historial: ${stats.totalHistoryRecords || 0}`);
+            } catch (error) {
+                console.error('[DEBUG] Error en getStats:', error);
+                alert('Error al obtener estadísticas');
+            }
+        }
+        
+        async function loadHistory() {
+            console.log('[DEBUG] loadHistory función iniciada');
+            
+            try {
+                console.log('[DEBUG] Enviando petición GET a /api/history');
+                
+                const response = await fetch('/api/history?limit=20');
+                console.log('[DEBUG] Respuesta recibida, status:', response.status);
+                
+                const result = await response.json();
+                console.log('[DEBUG] Historial recibido:', result);
+                
+                const historyList = document.getElementById('historyList');
+                
+                if (result.success && result.history.length > 0) {
+                    let historyHtml = '';
+                    result.history.forEach(record => {
+                        const resetDate = new Date(record.resetDate).toLocaleString('es-ES');
+                        const resetType = record.resetType === 'bulk' ? '(Reset Masivo)' : '';
+                        const userName = record.lastState.nombre || 'Sin nombre';
+                        const userTopic = record.lastState.topic || 'Sin tema';
+                        
+                        historyHtml += `
+                            <div class="border-bottom pb-2 mb-2">
+                                <small class="text-muted">${resetDate}</small>
+                                <div><strong>ID:</strong> ${record.chatId}</div>
+                                <div><strong>Nombre:</strong> ${userName}</div>
+                                <div><strong>Tema:</strong> ${userTopic}</div>
+                                ${resetType ? `<div class="text-info">${resetType}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                    historyList.innerHTML = historyHtml;
+                } else {
+                    historyList.innerHTML = '<p class="text-muted text-center">No hay registros en el historial</p>';
+                }
+            } catch (error) {
+                console.error('[DEBUG] Error en loadHistory:', error);
+                document.getElementById('historyList').innerHTML = '<p class="text-danger text-center">Error al cargar historial</p>';
+            }
+        }
+        
+        function viewLogs() {
+            console.log('[DEBUG] viewLogs función iniciada');
+            
+            try {
+                console.log('[DEBUG] Abriendo ventana de logs');
+                window.open('/api/logs', '_blank');
+            } catch (error) {
+                console.error('[DEBUG] Error en viewLogs:', error);
+                alert('Error al abrir logs');
+            }
+        }
+    </script>
+</body>
+</html>

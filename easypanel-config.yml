@@ -1,0 +1,73 @@
+# Configuración para EasyPanel - INTED WhatsApp Bot
+# Copia este contenido en tu aplicación de EasyPanel
+
+version: '3.8'
+
+services:
+  whatsapp-bot:
+    # Usar imagen desde Docker Hub (después de subirla)
+    # image: tu-usuario/inted-whatsapp-bot:latest
+    
+    # O construir desde repositorio Git
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    container_name: inted-whatsapp-bot
+    restart: always
+    
+    # Puerto expuesto
+    ports:
+      - "3000:3000"
+    
+    # Variables de entorno (configurar en EasyPanel)
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - WEB_USERNAME=admin
+      - WEB_PASSWORD=tu-password-segura-aqui
+    
+    # Volúmenes para persistencia
+    volumes:
+      - whatsapp_data:/app/data
+      - whatsapp_logs:/app/logs
+      - whatsapp_session:/app/.wwebjs_auth
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Límites de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+    
+    # Configuración de logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Volúmenes nombrados
+volumes:
+  whatsapp_data:
+    driver: local
+  whatsapp_logs:
+    driver: local
+  whatsapp_session:
+    driver: local
+
+# Red (opcional)
+networks:
+  default:
+    driver: bridge

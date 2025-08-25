@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  whatsapp-bot:
+    build: .
+    container_name: inted-whatsapp-bot
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - WEB_USERNAME=${WEB_USERNAME:-admin}
+      - WEB_PASSWORD=${WEB_PASSWORD:-inted2025}
+    volumes:
+      # Persistir datos de conversación
+      - ./data:/app/data
+      # Persistir logs
+      - ./logs:/app/logs
+      # Persistir sesión de WhatsApp
+      - ./.wwebjs_auth:/app/.wwebjs_auth
+      - ./session:/app/session
+    networks:
+      - whatsapp-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  whatsapp-network:
+    driver: bridge
+
+volumes:
+  whatsapp_data:
+    driver: local
+  whatsapp_logs:
+    driver: local
+  whatsapp_session:
+    driver: local
