@@ -1,8 +1,6 @@
 # Configuración para EasyPanel - INTED WhatsApp Bot
 # Copia este contenido en tu aplicación de EasyPanel
 
-version: '3.8'
-
 services:
   whatsapp-bot:
     # Usar imagen desde Docker Hub (después de subirla)
@@ -16,16 +14,17 @@ services:
     container_name: inted-whatsapp-bot
     restart: always
     
-    # Puerto expuesto
+    # Puerto expuesto (configurable para evitar conflictos)
     ports:
-      - "3000:3000"
+      - "${EXTERNAL_PORT:-3001}:${PORT:-3000}"
     
     # Variables de entorno (configurar en EasyPanel)
     environment:
       - NODE_ENV=production
-      - PORT=3000
-      - WEB_USERNAME=admin
-      - WEB_PASSWORD=tu-password-segura-aqui
+      - PORT=${PORT:-3000}
+      - EXTERNAL_PORT=${EXTERNAL_PORT:-3001}
+      - WEB_USERNAME=${WEB_USERNAME:-admin}
+      - WEB_PASSWORD=${WEB_PASSWORD:-tu-password-segura-aqui}
     
     # Volúmenes para persistencia
     volumes:

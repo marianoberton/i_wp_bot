@@ -1,15 +1,14 @@
-version: '3.8'
-
 services:
   whatsapp-bot:
     build: .
     container_name: inted-whatsapp-bot-prod
     restart: always
     ports:
-      - "3000:3000"
+      - "${EXTERNAL_PORT:-3000}:${PORT:-3000}"
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=${PORT:-3000}
+      - EXTERNAL_PORT=${EXTERNAL_PORT:-3000}
       - WEB_USERNAME=${WEB_USERNAME:-admin}
       - WEB_PASSWORD=${WEB_PASSWORD:-inted2025}
     volumes:
