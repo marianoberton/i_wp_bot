@@ -5,7 +5,13 @@
   "main": "index.js",
   "author": "INTED",
   "license": "MIT",
-  "keywords": ["whatsapp", "bot", "inted", "customer-service", "docker"],
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "inted",
+    "customer-service",
+    "docker"
+  ],
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js",
@@ -20,14 +26,15 @@
     "docker:compose:restart": "docker-compose restart"
   },
   "dependencies": {
-    "whatsapp-web.js": "^1.26.0",
-    "qrcode-terminal": "^0.12.0",
-    "validator": "^13.11.0",
-    "winston": "^3.11.0",
-    "pm2": "^5.4.3",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-basic-auth": "^1.2.1",
-    "cors": "^2.8.5",
-    "helmet": "^7.1.0"
+    "helmet": "^7.1.0",
+    "pm2": "^5.4.3",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "validator": "^13.11.0",
+    "whatsapp-web.js": "^1.26.0",
+    "winston": "^3.11.0"
   }
 }

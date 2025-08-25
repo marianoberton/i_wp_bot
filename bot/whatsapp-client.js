@@ -1,5 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const QRCode = require('qrcode');
 const logger = require('../utils/logger');
 const { isValidEmail, isValidText, sanitizeText } = require('../utils/validators');
 const { HUMAN_MODE, getUserState, setUserState, resetUserState } = require('./conversation-state');
@@ -124,7 +125,28 @@ function createWhatsAppClient() {
 
     // Event listeners
     client.on('qr', (qr) => {
-        qrcode.generate(qr, { small: true });
+        console.log('\n=== CÓDIGO QR PARA WHATSAPP ===');
+        console.log('Escanea este código con tu teléfono:');
+        console.log('WhatsApp > Configuración > Dispositivos vinculados > Vincular dispositivo\n');
+        
+        // Usar qrcode con opciones más compactas
+        QRCode.toString(qr, {
+            type: 'terminal',
+            small: true,
+            errorCorrectionLevel: 'L',
+            width: 40  // Ancho más pequeño
+        }, (err, qrString) => {
+            if (err) {
+                console.error('Error generando QR:', err);
+                // Fallback a qrcode-terminal
+                qrcode.setErrorLevel('L');
+                qrcode.generate(qr, { small: true });
+            } else {
+                console.log(qrString);
+            }
+        });
+        
+        console.log('\n=== ESCANEA CON TU TELÉFONO ===\n');
         logger.info('Código QR generado para autenticación');
     });
 
