@@ -1,13 +1,16 @@
-# Configuración para EasyPanel - INTED WhatsApp Bot
-# Copia este contenido en tu aplicación de EasyPanel
+# Configuración Docker Compose específica para EasyPanel
+# Este archivo evita conflictos de nombres y puertos
 
 services:
   whatsapp-bot:
     build: .
+    # Sin container_name para evitar conflictos en EasyPanel
     restart: always
-    # EasyPanel maneja automáticamente el puerto
+    
+    # Puerto dinámico - EasyPanel asignará automáticamente
     expose:
       - "3000"
+    
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -15,18 +18,21 @@ services:
       - WEB_PASSWORD=${WEB_PASSWORD:-inted2025}
       - WHATSAPP_SESSION_NAME=${WHATSAPP_SESSION_NAME:-inted-session}
       - LOG_LEVEL=${LOG_LEVEL:-info}
+    
     volumes:
-      # Usar volúmenes nombrados para mejor compatibilidad con EasyPanel
+      # Volúmenes nombrados para persistencia
       - whatsapp_data:/app/data
       - whatsapp_logs:/app/logs
       - whatsapp_session:/app/.wwebjs_auth
+    
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
-    # Límites de recursos
+    
+    # Límites de recursos para EasyPanel
     deploy:
       resources:
         limits:
@@ -35,8 +41,15 @@ services:
         reservations:
           memory: 512M
           cpus: '0.25'
+    
+    # Configuración de logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-# Volúmenes nombrados
+# Volúmenes nombrados para persistencia
 volumes:
   whatsapp_data:
     driver: local
@@ -44,8 +57,3 @@ volumes:
     driver: local
   whatsapp_session:
     driver: local
-
-# Red (opcional)
-networks:
-  default:
-    driver: bridge

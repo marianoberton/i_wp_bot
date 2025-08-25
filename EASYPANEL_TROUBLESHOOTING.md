@@ -23,26 +23,32 @@
 
 ## 📋 Configuración Recomendada para EasyPanel
 
-### Variables de Entorno
+### Usar Configuración Específica
+Usa el archivo `docker-compose.easypanel.yml` que está optimizado para EasyPanel:
+
 ```bash
-# Puerto (usar puerto diferente si 3000 está ocupado)
-EXTERNAL_PORT=3001
-PORT=3000
-
-# Entorno
-NODE_ENV=production
-
-# Credenciales del panel (CAMBIAR por seguridad)
-WEB_USERNAME=admin
-WEB_PASSWORD=tu-password-muy-segura
-
-# Opcional: Configuración de WhatsApp
-WHATSAPP_SESSION_NAME=inted-session
-
-# Opcional: Logs
-LOG_LEVEL=info
-LOG_FILE=combined.log
+# En EasyPanel, especifica el archivo de configuración:
+docker-compose -f docker-compose.easypanel.yml up -d
 ```
+
+### Variables de Entorno
+Configura estas variables en EasyPanel:
+
+```bash
+# Credenciales del panel web
+WEB_USERNAME=admin
+WEB_PASSWORD=tu-password-segura-aqui
+
+# Configuración de WhatsApp
+WHATSAPP_SESSION_NAME=inted-session
+LOG_LEVEL=info
+```
+
+### Diferencias Clave
+- **Sin `container_name`**: Evita conflictos de nombres
+- **Sin `ports`**: Usa `expose` para que EasyPanel maneje el puerto automáticamente
+- **Volúmenes nombrados**: Mejor compatibilidad con EasyPanel
+- **Límites de recursos**: Configuración optimizada para hosting compartido
 
 ### Configuración de Puertos
 - **Puerto interno del contenedor:** 3000 (no cambiar)
@@ -69,9 +75,19 @@ LOG_FILE=combined.log
    - `/app/logs` → Para archivos de log
    - `/app/.wwebjs_auth` → Para sesión de WhatsApp
 
-4. **Deploy:**
-   - EasyPanel usará automáticamente el `docker-compose.yml`
-   - El puerto se configurará automáticamente según `EXTERNAL_PORT`
+4. **Deploy usando configuración específica:**
+   ```bash
+   # Opción 1: Usar el archivo optimizado para EasyPanel
+   docker-compose -f docker-compose.easypanel.yml up -d
+   
+   # Opción 2: Usar easypanel-config.yml (también compatible)
+   docker-compose -f easypanel-config.yml up -d
+   ```
+
+5. **Verificación:**
+   - EasyPanel asignará automáticamente un puerto disponible
+   - Monitorear los logs durante el inicio
+   - Acceder a la aplicación usando la URL proporcionada por EasyPanel
 
 ## 🐛 Debugging
 
